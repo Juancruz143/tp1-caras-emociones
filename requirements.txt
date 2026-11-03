@@ -1,0 +1,5 @@
+streamlit
+tensorflow-cpu>=2.16
+opencv-python-headless<5
+numpy
+gdown>=5

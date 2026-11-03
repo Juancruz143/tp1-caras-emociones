@@ -1,0 +1,51 @@
+{
+  "identidad": {
+    "base": "MobileNetV2",
+    "clases": [
+      "azzaro",
+      "candela_vetrano",
+      "colapinto",
+      "dario_barassi",
+      "dolores_fonzi",
+      "erica_rivas",
+      "eva_de_dominici",
+      "georgina_barbarossa",
+      "griselda_siciliani",
+      "guillermo_francella",
+      "javier_milei",
+      "julio_chavez",
+      "lali_esposito",
+      "momo",
+      "mora_bianchi",
+      "oscar_martinez",
+      "pablo_echarri",
+      "ricardo_darin",
+      "scaloni",
+      "tini_stoessel"
+    ],
+    "tam": 224,
+    "dropout": 0.3,
+    "pesos": "identidad.npz",
+    "accuracy_val": 0.5464190981432361,
+    "f1_val": 0.37604301883987246,
+    "accuracy_test": 0.5609284332688588,
+    "drive_id": "17kQcagY6HlgitM-Fsaz2Wzu3mapJEp-J"
+  },
+  "emocion": {
+    "base": "ResNet50",
+    "clases": [
+      "alegria",
+      "sorpresa",
+      "enojo",
+      "tristeza",
+      "neutral"
+    ],
+    "tam": 224,
+    "dropout": 0.4,
+    "pesos": "emocion.npz",
+    "accuracy_val": 0.41114058355437666,
+    "f1_val": 0.3772018684561745,
+    "accuracy_test": 0.3694390715667311,
+    "drive_id": "1nQ0A5_fzHnrN0xaC4_Byjq88nySylWRy"
+  }
+}
