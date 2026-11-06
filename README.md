@@ -26,3 +26,12 @@ streamlit run app.py
 ```
 
 Funciona con Python 3.10 a 3.13.
+
+## Versión con la CNN desde cero (`app_cnn/`)
+
+Una segunda app, aparte, que usa la **CNN desde cero** del notebook (Conv 32 → Conv 64 → Flatten → Densa 128), una para identidad y otra para emoción, sin ninguna red preentrenada. Sirve para comparar con la app principal.
+
+- Se reentrenó con la misma arquitectura, la misma partición 80/15/5 por video, la misma aumentación, los mismos pesos por clase y los mismos callbacks que el notebook (en CPU).
+- En test: 34 % en identidad y 29 % en emoción (validación: 58 % y 26 %). La CNN desde cero es inestable: cada entrenamiento da números algo distintos, y en el notebook había dado 42 % y 19 % en test.
+- Los pesos van en `app_cnn/cnn_*.npz`, guardados en float16 para que cada archivo pese menos de 50 MB.
+- Para publicarla en Streamlit: mismo repositorio, rama `main`, archivo principal `app_cnn/app.py` (usa su propio `app_cnn/requirements.txt`, con TensorFlow).

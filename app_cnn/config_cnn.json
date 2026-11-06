@@ -1,0 +1,49 @@
+{
+  "identidad": {
+    "clases": [
+      "azzaro",
+      "candela_vetrano",
+      "colapinto",
+      "dario_barassi",
+      "dolores_fonzi",
+      "erica_rivas",
+      "eva_de_dominici",
+      "georgina_barbarossa",
+      "griselda_siciliani",
+      "guillermo_francella",
+      "javier_milei",
+      "julio_chavez",
+      "lali_esposito",
+      "momo",
+      "mora_bianchi",
+      "oscar_martinez",
+      "pablo_echarri",
+      "ricardo_darin",
+      "scaloni",
+      "tini_stoessel"
+    ],
+    "tam": 224,
+    "pesos": "cnn_identidad.npz",
+    "accuracy_val": 0.5760869565217391,
+    "f1_val": 0.469738704404097,
+    "accuracy_test": 0.3429,
+    "f1_test": 0.34894613346478753,
+    "epocas": 27
+  },
+  "emocion": {
+    "clases": [
+      "alegria",
+      "sorpresa",
+      "enojo",
+      "tristeza",
+      "neutral"
+    ],
+    "tam": 224,
+    "pesos": "cnn_emocion.npz",
+    "accuracy_val": 0.2554347826086957,
+    "f1_val": 0.23247236163144896,
+    "accuracy_test": 0.2931937172774869,
+    "f1_test": 0.283886988018315,
+    "epocas": 19
+  }
+}
