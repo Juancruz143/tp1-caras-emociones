@@ -35,3 +35,7 @@ Una segunda app, aparte, que usa la **CNN desde cero** del notebook (Conv 32 →
 - En test: 34 % en identidad y 29 % en emoción (validación: 58 % y 26 %). La CNN desde cero es inestable: cada entrenamiento da números algo distintos, y en el notebook había dado 42 % y 19 % en test.
 - Los pesos van en `app_cnn/cnn_*.npz`, guardados en float16 para que cada archivo pese menos de 50 MB.
 - Para publicarla en Streamlit: mismo repositorio, rama `main`, archivo principal `app_cnn/app.py` (usa su propio `app_cnn/requirements.txt`, con TensorFlow).
+
+## Presentación
+
+La presentación del TP está en [`docs/TP1_Entrega2_Modelos.pptx`](docs/TP1_Entrega2_Modelos.pptx) ([descarga directa](https://github.com/Juancruz143/tp1-caras-emociones/raw/main/docs/TP1_Entrega2_Modelos.pptx)).
