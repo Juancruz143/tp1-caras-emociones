@@ -4,8 +4,8 @@ App de Streamlit del **TP1 de IA y Aprendizaje Automático II** (UCA Rosario, 20
 
 Se sube una foto de una de las 20 personas del dataset del curso. La app detecta la cara, la recorta igual que en el dataset (cuadrada, con 25 % de margen, 224×224) y predice:
 
-- **Quién es**, con MobileNetV2 preentrenada en ImageNet (transferencia). En test: 56 % de accuracy sobre 20 personas.
-- **Qué emoción muestra** (alegría, sorpresa, enojo, tristeza o neutral), con ResNet50 preentrenada en ImageNet (transferencia, con ajuste fino de las últimas 30 capas). En test: 37 % de accuracy sobre 5 emociones.
+- **Quién es**, con ResNet50 preentrenada en ImageNet (transferencia, con ajuste fino de las últimas 30 capas). En test: 62 % de accuracy sobre 20 personas.
+- **Qué emoción muestra** (alegría, sorpresa, enojo, tristeza o neutral), con ResNet50 preentrenada en ImageNet (transferencia, con ajuste fino de las últimas 30 capas). En test: 32 % de accuracy sobre 5 emociones.
 
 Los dos modelos se eligieron por F1 macro en validación, sobre una partición por video (nunca por cuadro) para evitar fugas entre entrenamiento y test.
 

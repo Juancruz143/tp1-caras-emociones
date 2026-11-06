@@ -1,6 +1,6 @@
 {
   "identidad": {
-    "base": "MobileNetV2",
+    "base": "ResNet50",
     "clases": [
       "azzaro",
       "candela_vetrano",
@@ -26,9 +26,9 @@
     "tam": 224,
     "dropout": 0.3,
     "pesos": "identidad.npz",
-    "accuracy_val": 0.5464190981432361,
-    "f1_val": 0.37604301883987246,
-    "accuracy_test": 0.5609284332688588,
+    "accuracy_val": 0.6141304347826086,
+    "f1_val": 0.4901645881629305,
+    "accuracy_test": 0.6178010471204188,
     "drive_id": "17kQcagY6HlgitM-Fsaz2Wzu3mapJEp-J"
   },
   "emocion": {
@@ -43,9 +43,9 @@
     "tam": 224,
     "dropout": 0.4,
     "pesos": "emocion.npz",
-    "accuracy_val": 0.41114058355437666,
-    "f1_val": 0.3772018684561745,
-    "accuracy_test": 0.3694390715667311,
-    "drive_id": "1nQ0A5_fzHnrN0xaC4_Byjq88nySylWRy"
+    "accuracy_val": 0.41847826086956524,
+    "f1_val": 0.3891322980001465,
+    "accuracy_test": 0.32460732984293195,
+    "drive_id": "1hJ6qFqFj1gyCdSQxhtaxX1C3_LKnofKx"
   }
 }
