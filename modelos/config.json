@@ -1,6 +1,6 @@
 {
   "identidad": {
-    "base": "ResNet50",
+    "base": "FaceNet",
     "clases": [
       "azzaro",
       "candela_vetrano",
@@ -23,29 +23,21 @@
       "scaloni",
       "tini_stoessel"
     ],
-    "tam": 224,
-    "dropout": 0.3,
-    "pesos": "identidad.npz",
-    "accuracy_val": 0.6141304347826086,
-    "f1_val": 0.4901645881629305,
-    "accuracy_test": 0.6178010471204188,
-    "drive_id": "17kQcagY6HlgitM-Fsaz2Wzu3mapJEp-J"
+    "accuracy_val": 0.9510869565217391,
+    "f1_val": 0.8949822359465672,
+    "accuracy_test": 0.9476439790575916
   },
   "emocion": {
-    "base": "ResNet50",
+    "base": "HSEmotion",
     "clases": [
       "alegria",
-      "sorpresa",
       "enojo",
-      "tristeza",
-      "neutral"
+      "neutral",
+      "sorpresa",
+      "tristeza"
     ],
-    "tam": 224,
-    "dropout": 0.4,
-    "pesos": "emocion.npz",
-    "accuracy_val": 0.41847826086956524,
-    "f1_val": 0.3891322980001465,
-    "accuracy_test": 0.32460732984293195,
-    "drive_id": "1hJ6qFqFj1gyCdSQxhtaxX1C3_LKnofKx"
+    "accuracy_val": 0.5706521739130435,
+    "f1_val": 0.5437887978581226,
+    "accuracy_test": 0.5209424083769634
   }
 }

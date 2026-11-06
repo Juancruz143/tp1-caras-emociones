@@ -2,56 +2,77 @@
 
 Sube una foto de una de las 20 personas del dataset del curso. La app detecta la cara,
 la recorta igual que en el dataset y predice quién es y qué emoción muestra, con los
-mejores modelos del notebook (elegidos por F1 macro en validación).
+mejores modelos del notebook (elegidos por F1 macro en validación):
+
+- identidad: FaceNet (red entrenada en caras) + regresión logística;
+- emoción: HSEmotion (red entrenada en expresiones faciales) + regresión logística.
+
+Las dos redes no se entrenaron: se usan para sacar la "huella" de cada cara, y encima
+va un clasificador chico entrenado con nuestro dataset (modelos/clasificadores.npz).
 """
 import json
+import urllib.request
 from pathlib import Path
 
 import cv2
 import numpy as np
 import streamlit as st
-import tensorflow as tf
-from tensorflow.keras import layers
+import timm
+import torch
+
+from facenet_modelo import InceptionResnetV1
 
 CARPETA = Path(__file__).parent / "modelos"
+HSE_URL = ("https://raw.githubusercontent.com/HSE-asavchenko/face-emotion-recognition/main/"
+           "models/affectnet_emotions/enet_b0_8_best_afew.pt")
 EMOJI = {"alegria": "😄", "sorpresa": "😮", "enojo": "😠", "tristeza": "😢", "neutral": "😐"}
+TAM = 224                                    # tamaño de los recortes del dataset
 
 st.set_page_config(page_title="¿Quién es y qué siente?", page_icon="🎭", layout="centered")
 
 
 # ── Modelos ──────────────────────────────────────────────────────────────────
-def construir(cfg):
-    """Arma la misma arquitectura que en el notebook y le carga los pesos entrenados."""
-    tam, n = cfg["tam"], len(cfg["clases"])
-    bases = {"MobileNetV2": tf.keras.applications.MobileNetV2,
-             "EfficientNetB0": tf.keras.applications.EfficientNetB0,
-             "ResNet50": tf.keras.applications.ResNet50}
-    base = bases[cfg["base"]](input_shape=(tam, tam, 3), include_top=False, weights=None)
-    ent = tf.keras.Input((tam, tam, 3))
-    if cfg["base"] == "MobileNetV2":
-        x = layers.Rescaling(1 / 127.5, offset=-1)(ent)                     # [0, 255] → [−1, 1]
-    elif cfg["base"] == "ResNet50":
-        x = layers.Lambda(tf.keras.applications.resnet50.preprocess_input)(ent)
-    else:                                                                     # EfficientNetB0 escala adentro
-        x = ent
-    x = base(x, training=False)
-    x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(cfg["dropout"])(x)
-    modelo = tf.keras.Model(ent, layers.Dense(n, activation="softmax")(x))
-
-    pesos = CARPETA / cfg["pesos"]
-    if not pesos.exists() and cfg.get("drive_id"):                            # pesos grandes: se bajan del Drive
-        import gdown
-        gdown.download(id=cfg["drive_id"], output=str(pesos), quiet=True)
-    with np.load(pesos) as z:
-        modelo.set_weights([z[f"arr_{i}"] for i in range(len(z.files))])
-    return modelo
+def cargar_hsemotion():
+    """EfficientNet-B0 entrenada con AffectNet. Se rearma con timm y se le cargan los pesos publicados."""
+    archivo = Path.home() / ".cache" / "hsemotion" / "enet_b0_8_best_afew.pt"
+    if not archivo.exists():
+        archivo.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve(HSE_URL, archivo)
+    original = torch.load(archivo, weights_only=False, map_location="cpu")
+    red = timm.create_model("tf_efficientnet_b0", pretrained=False, num_classes=8)
+    red.load_state_dict({k.replace("classifier.0.", "classifier."): v for k, v in original.state_dict().items()})
+    red.classifier = torch.nn.Identity()     # solo la huella de la expresión (1280 números)
+    return red.eval()
 
 
 @st.cache_resource(show_spinner="Cargando los modelos…")
 def cargar():
     config = json.loads((CARPETA / "config.json").read_text(encoding="utf-8"))
-    return config, {tarea: construir(cfg) for tarea, cfg in config.items()}
+    with np.load(CARPETA / "clasificadores.npz") as z:
+        clasif = {t: (z[f"{t}_W"], z[f"{t}_b"]) for t in ("identidad", "emocion")}
+    redes = {"identidad": InceptionResnetV1(pretrained="vggface2").eval(), "emocion": cargar_hsemotion()}
+    return config, redes, clasif
+
+
+MEDIA, DESVIO = np.array([0.485, 0.456, 0.406]), np.array([0.229, 0.224, 0.225])
+
+
+def huella(tarea, rgb, redes):
+    """Mismo preprocesado que en el notebook (sección 8 bis y 8 ter)."""
+    if tarea == "identidad":                 # FaceNet: 160×160, píxeles a [−1, 1]
+        x = cv2.resize(rgb, (160, 160), interpolation=cv2.INTER_AREA).astype(np.float32)
+        x = (x - 127.5) / 128
+    else:                                    # HSEmotion: 224×224, normalización de ImageNet
+        x = (rgb / 255.0 - MEDIA) / DESVIO
+    x = torch.tensor(x.transpose(2, 0, 1)[None]).float()
+    with torch.no_grad():
+        return redes[tarea](x).numpy()[0]
+
+
+def probabilidades(h, W, b):
+    z = h @ W.T + b                          # regresión logística: softmax de una capa lineal
+    e = np.exp(z - z.max())
+    return e / e.sum()
 
 
 # El detector de caras viaja con la app (el archivo .xml): así no depende de dónde lo instale cada versión de OpenCV.
@@ -80,15 +101,17 @@ def bonito(nombre):
 st.title("🎭 ¿Quién es y qué siente?")
 st.caption("TP1 · IAyAA II · UCA Rosario 2026 · Grupo 10: Franco Do Brito, Juan Cruz Montero, Lucía Formenti")
 
-config, modelos = cargar()
+config, redes, clasif = cargar()
 
 with st.expander("¿Cómo funciona?"):
     personas = ", ".join(bonito(c) for c in config["identidad"]["clases"])
     st.markdown(
         f"Subí una foto de alguna de estas **{len(config['identidad']['clases'])} personas**: {personas}.\n\n"
-        "La app busca la cara, la recorta igual que en el dataset (cuadrada, con margen, 224×224) y dos redes "
-        "entrenadas por transferencia predicen **quién es** y **qué emoción muestra** "
-        f"(identidad: {config['identidad']['base']}; emoción: {config['emocion']['base']}).\n\n"
+        "La app busca la cara y la recorta igual que en el dataset (cuadrada, con margen, 224×224). "
+        "Después, dos redes ya entrenadas por otros la describen con una \"huella\" de números: "
+        "**FaceNet**, entrenada con millones de caras para distinguir personas, y **HSEmotion**, entrenada "
+        "con cientos de miles de caras para reconocer expresiones. Sobre esas huellas, dos clasificadores "
+        "entrenados con nuestro dataset dicen **quién es** y **qué emoción muestra**.\n\n"
         "Funciona mejor con la cara de frente, bien iluminada y sola en la foto. Si la persona no es una de las "
         "de la lista, igual va a contestar con el nombre más parecido: el modelo no sabe decir \"no la conozco\"."
     )
@@ -103,13 +126,11 @@ if img is None:
     st.error("No pude abrir la imagen. Probá con otro archivo (JPG o PNG).")
     st.stop()
 
-tam = config["identidad"]["tam"]
-cara = recortar_cara(img, tam)
+cara = recortar_cara(img, TAM)
 if cara is None:
     st.warning("No encontré ninguna cara en la foto: uso la imagen entera, y el resultado puede ser peor.")
-    cara = cv2.resize(img, (tam, tam), interpolation=cv2.INTER_AREA)
+    cara = cv2.resize(img, (TAM, TAM), interpolation=cv2.INTER_AREA)
 rgb = cv2.cvtColor(cara, cv2.COLOR_BGR2RGB)
-x = rgb.astype("float32")[None]                                              # mismo formato que en el notebook
 
 col_img, col_res = st.columns([1, 1.6])
 with col_img:
@@ -117,7 +138,7 @@ with col_img:
 
 with col_res:
     for tarea, titulo in (("identidad", "¿Quién es?"), ("emocion", "¿Qué emoción muestra?")):
-        prob = modelos[tarea].predict(x, verbose=0)[0]
+        prob = probabilidades(huella(tarea, rgb, redes), *clasif[tarea])
         clases = config[tarea]["clases"]
         top = prob.argsort()[::-1][:3]
         ganador = clases[top[0]]
@@ -127,8 +148,7 @@ with col_res:
         for i in top:
             st.progress(float(prob[i]), text=f"{bonito(clases[i])}: {prob[i]:.0%}")
 
-if "accuracy_test" in config["identidad"]:
-    st.caption(
-        f"Para tener en cuenta: en el test (videos que el modelo nunca vio) acertó "
-        f"{config['identidad']['accuracy_test']:.0%} en identidad y {config['emocion']['accuracy_test']:.0%} en emoción."
-    )
+st.caption(
+    f"Para tener en cuenta: en el test (videos que el modelo nunca vio) acertó "
+    f"{config['identidad']['accuracy_test']:.0%} en identidad y {config['emocion']['accuracy_test']:.0%} en emoción."
+)

@@ -1,5 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 streamlit
-tensorflow-cpu>=2.16
+torch
+timm
 opencv-python-headless<5
 numpy
-gdown>=5

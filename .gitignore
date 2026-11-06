@@ -1,3 +1,1 @@
-# Los pesos de los modelos se bajan solos del Drive la primera vez que arranca la app
-modelos/*.npz
 __pycache__/
