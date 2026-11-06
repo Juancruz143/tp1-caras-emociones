@@ -39,3 +39,7 @@ Una segunda app, aparte, que usa la **CNN desde cero** del notebook (Conv 32 →
 ## Presentación
 
 La presentación del TP está en [`docs/TP1_Entrega2_Modelos.pptx`](docs/TP1_Entrega2_Modelos.pptx) ([descarga directa](https://github.com/Juancruz143/tp1-caras-emociones/raw/main/docs/TP1_Entrega2_Modelos.pptx)).
+
+## Streamlit
+https://tp1-grupo10.streamlit.app
+
